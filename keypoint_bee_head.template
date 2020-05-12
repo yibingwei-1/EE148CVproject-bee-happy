@@ -1,0 +1,48 @@
+<script src="https://assets.crowd.aws/crowd-html-elements.js"></script>
+
+<crowd-form>
+  <crowd-keypoint
+    name="annotatedResult"
+    src="{{ task.input.taskObject | grant_read_access }}"
+    header="Please place points on heads of each bee"
+    labels="['Heads']"
+  >
+    <full-instructions header="Keypoint Instructions" >
+      <p>Use the keypoint tool to place a point on the heads of each bees.:</p>
+      <ul>
+        <li>Please locate the head right between eyes. </li>
+        <li> Please locate the center point of the top part of bee if the head is invisible.</li>
+        <li>Do not include parts of the target that cannot be seen,
+          even though you think you can interpolate the whole shape of the target.</li>
+      </ul>
+      <b>Good example:</b> <br />
+      <img src="https://drscdn.500px.org/photo/1015428509/m%3D900/v2?sig=2762b8d04b1c783367c6bae2431886877ef8fa9204712352a14df306d1f240eb" height="200"></li>
+    <br /><br />
+        
+    <ul>
+          <b>Bad examples:</b></li>
+        <li>Did not locate the head <img src="https://drscdn.500px.org/photo/1015428494/m%3D256/v2?sig=69ab0ecf3b4ce7626a9ccf64f3ad63e7a1b380a1c316b002b5c8493cff69fa2b" height="80"><img src="https://drscdn.500px.org/photo/1015428493/m%3D900/v2?sig=86620e8c6e3ecb037bee3e6c73b3532d827f8bb5aa9a34a7fcac9eeb9a76dce7" height="80"/></li>
+        <li>Locate the wrong point rather than the center of top part of the bee 
+
+<img src="https://drscdn.500px.org/photo/1015428496/m%3D900/v2?sig=484cbe18c49a0d463c57171b4dd4451332405b9319ba63ec2993ff62869ba754" height="80"></li>
+        <li>Include the parts of the bee that cannot be seen <img src="https://drscdn.500px.org/photo/1015428495/m%3D256/v2?sig=261f4c49fceb4fe5cc10b057a9b4538bcf80efcb2a0eb15ffa3bb0e07681edb5" height="80"></li>
+        <li>Did not locate the bee <img src="https://drscdn.500px.org/photo/1015428497/m%3D900/v2?sig=6c9e87a8011818ff8b639779c206be26e29c7ea555bc622a08b66b5aedd569ae" height="80"></li>
+      </ul>
+    </full-instructions>
+
+    <short-instructions>
+      Place a point on the head right between the eyes, or the center of bee's top part if the head is invisible.
+      <br />
+      Good example<br />
+      <img src="https://drscdn.500px.org/photo/1015436997/m%3D900/v2?sig=3eede4d0e138801d56857d04a90481deb347efbd3cea613f789a555353656a52" height="150">
+      <br />
+      Bad examples<br />
+          <img src="https://drscdn.500px.org/photo/1015428494/m%3D256/v2?sig=69ab0ecf3b4ce7626a9ccf64f3ad63e7a1b380a1c316b002b5c8493cff69fa2b" height="80"><br />
+          <img src="https://drscdn.500px.org/photo/1015428493/m%3D900/v2?sig=86620e8c6e3ecb037bee3e6c73b3532d827f8bb5aa9a34a7fcac9eeb9a76dce7" height="80"/><br />
+          <img src="https://drscdn.500px.org/photo/1015428496/m%3D900/v2?sig=484cbe18c49a0d463c57171b4dd4451332405b9319ba63ec2993ff62869ba754" height="80"><br />
+          <img src="https://drscdn.500px.org/photo/1015428495/m%3D256/v2?sig=261f4c49fceb4fe5cc10b057a9b4538bcf80efcb2a0eb15ffa3bb0e07681edb5" height="80"><br />
+          <img src="https://drscdn.500px.org/photo/1015428497/m%3D900/v2?sig=6c9e87a8011818ff8b639779c206be26e29c7ea555bc622a08b66b5aedd569ae" height="80"><br />
+      
+    </short-instructions>
+  </crowd-keypoint>
+</crowd-form>
