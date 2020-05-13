@@ -5,7 +5,7 @@ from matplotlib.patches import Circle
 from collections import defaultdict
 from pathlib import Path
 
-dir_path = Path('/Users/Evelyn/Desktop/EE148CV/bee-happy/S3_bee_happy_bucket')
+dir_path = Path('./S3_bee_happy_bucket')
 
 '''
 dealing with the mapping id to image_name
