@@ -8,7 +8,6 @@ import os
 import torch
 import torch.utils.data as data
 from PIL import Image,ImageDraw, ImageFont
-from collections import defaultdict, OrderedDict
 
 
 def convert_bbox(width, top, height, left):
