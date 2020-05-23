@@ -1,3 +1,6 @@
+'''
+viusalize the keypoint
+'''
 import matplotlib.pyplot as plt
 import json
 from matplotlib.patches import Circle
@@ -5,7 +8,7 @@ from matplotlib.patches import Circle
 from collections import defaultdict
 from pathlib import Path
 
-dir_path = Path('./S3_bee_happy_bucket')
+dir_path = Path('./bee-happy-bucket')
 
 '''
 dealing with the mapping id to image_name
@@ -18,11 +21,11 @@ for line in open(annotations_path,'r'):
 
 
 # load consolidated_result.json
-json_path = dir_path/'Annotations/test-keypoint-100demo/consolidated_result.json'
+json_path = dir_path/'Annotations/test-keypoint-100demo/consolidated_result_naive.json'
 for line in open(json_path,'r'):
     consolidated_data = json.loads(line)
 
-datasetObjectId = '8'
+datasetObjectId = '16'
 # plot consolidated result
 img = plt.imread(dir_path/"Datasets/test-keypoint-100demo/"/map_id2filename[datasetObjectId])
 
@@ -40,7 +43,7 @@ for keypoint in consolidated_data[datasetObjectId]:
 
 
 # first read the json
-demo_path = './S3_bee_happy_bucket/Annotations/test-keypoint-100demo/test100-all-annotations.json'
+demo_path = './bee-happy-bucket/Annotations/test-keypoint-100demo/test100-all-annotations.json'
 data = []
 for line in open(demo_path, 'r'):
     data = json.loads(line)
