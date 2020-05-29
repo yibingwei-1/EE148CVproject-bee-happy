@@ -58,18 +58,33 @@ class caltech_bee(data.Dataset):
     For example, such a dataset, when accessed with dataset[idx], could read the idx-th image and its corresponding label from a folder on the disk.
     '''
 
-    def __init__(self, root='../bee-happy-bucket/caltech-bee', transforms=None):
+    def __init__(self, root='../bee-happy-bucket/caltech-bee', data_type='normal',transforms=None):
+
+        if data_type == 'normal':
+            self.image_path = 'images_ignoreNoLabel'
+            box_path = 'bboxes'
+            json_name = 'all-annotations_ignoreNoLabel.json'
+            self.data_name = 'Bee-Happy-final-Step2'
+            self.confidence_threshold = 0.1
+        else:
+            #pollen
+            self.image_path = 'images_pollen'
+            box_path = 'bboxes_pollen'
+            json_name = 'all-annotations_pollen.json'
+            self.data_name = 'Bee-Happy-Pollen'
+            self.confidence_threshold = 0.0
+
         self.root = root
         self.transforms = transforms
         # load all image files, sorting them to
         # ensure that they are aligned
 
-        imgs = list(sorted(os.listdir(os.path.join(root, "images_ignoreNoLabel"))))
+        imgs = list(sorted(os.listdir(os.path.join(root, self.image_path))))#images_pollen
         self.imgs = [f for f in imgs if '.jpg' in f]
         print('Img:{}'.format(len(self.imgs)))
 
         # get bounding box coordinates for each mask
-        bbox_path = os.path.join(self.root, "bboxes", 'all-annotations_ignoreNoLabel.json')
+        bbox_path = os.path.join(self.root, box_path, json_name)
 
         for line in open(bbox_path, 'r'):
             responses = json.loads(line)  # one line
@@ -92,28 +107,28 @@ class caltech_bee(data.Dataset):
 
     def __getitem__(self, idx):
         # load images and bbox
-        img_path = os.path.join(self.root, "images_ignoreNoLabel", self.imgs[idx])
+        img_path = os.path.join(self.root, self.image_path, self.imgs[idx])
 
         img = Image.open(img_path).convert("RGB")
 
         consolidated_response = self.bboxes[idx]
         # map_idx2label = consolidated_response['consolidatedAnnotation']['content']['Bee-Happy-final-Step2-metadata']['class-map']
-        object_values = consolidated_response['consolidatedAnnotation']['content']['Bee-Happy-final-Step2-metadata']['objects'] #list of dict [{'confidence':0.24}]
+        object_values = consolidated_response['consolidatedAnnotation']['content'][self.data_name + '-metadata']['objects'] #list of dict [{'confidence':0.24}] #Bee-Lucky-Step2-metadata
         valid_indices = []
         for i,d in enumerate(object_values):
-            if d['confidence'] >= 0.1:
+            if d['confidence'] >= self.confidence_threshold: #
                 valid_indices.append(i)
-
-        annotations = consolidated_response['consolidatedAnnotation']['content']['Bee-Happy-final-Step2']['annotations']
+        # Bee-Lucky-Step2-metadata
+        annotations = consolidated_response['consolidatedAnnotation']['content'][self.data_name]['annotations'] #
         num_objs = len(annotations)
 
         labels = []
         boxes = []
-        for idx in valid_indices:
+        for valid_idx in valid_indices:
             # to remove label 0 (refer to background)
             # 1: pollen
             # 2: without pollen
-            a = annotations[idx]
+            a = annotations[valid_idx]
             if not check_box_size(a['height'], a['width']):
                 continue
             labels.append(int(a['class_id']) + 1)
@@ -124,6 +139,9 @@ class caltech_bee(data.Dataset):
         # there is only one class
         labels = torch.as_tensor(labels, dtype=torch.int64)
         image_id = torch.tensor([idx])
+        # print(type(boxes))
+        # print(boxes.shape)
+        # print(boxes)
         area = (boxes[:, 3] - boxes[:, 1]) * (boxes[:, 2] - boxes[:, 0])
 
         # suppose all instances are not crowd

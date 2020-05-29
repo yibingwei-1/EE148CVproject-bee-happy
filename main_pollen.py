@@ -4,7 +4,7 @@ from torchvision.models.detection.rpn import AnchorGenerator
 
 # load a pre-trained model for classification and return
 # only the features
-backbone = torchvision.models.mobilenet_v2(pretrained=True).features
+backbone = torchvision.models.mobilenet_v2(pretrained=False).features
 # FasterRCNN needs to know the number of
 # output channels in a backbone. For mobilenet_v2, it's 1280
 # so we need to add it here
@@ -56,67 +56,39 @@ def get_transform(train):
 from caltech_bee import caltech_bee
 
 # use our dataset and defined transformations
-root_path = '../bee-happy-bucket/caltech-bee'
-# root_path = '../bee-lucky-one-video/caltech-bee-one-video'
-
-dataset_normal = caltech_bee(root=root_path, transforms=get_transform(train=True))
-dataset_pollen = caltech_bee(root=root_path, data_type='pollen', transforms=get_transform(train=True))
-
-dataset_normal_validation = caltech_bee(root=root_path, transforms=get_transform(train=False))
-dataset_pollen_validation = caltech_bee(root=root_path, data_type='pollen', transforms=get_transform(train=False))
-
-datasets = [dataset_normal, dataset_pollen]
-dataset = torch.utils.data.ConcatDataset(datasets)
-
-datasets_validation = [dataset_normal_validation, dataset_pollen_validation]
-dataset_validation = torch.utils.data.ConcatDataset(datasets_validation)
+root_path ='../bee-happy-bucket/caltech-bee'
+#root_path = '../bee-lucky-one-video/caltech-bee-one-video'
+dataset = caltech_bee(root=root_path, transforms=get_transform(train=True))
+dataset_validation = caltech_bee(root=root_path, transforms=get_transform(train=False))
 
 # split the dataset in train and test set
 torch.manual_seed(1)
 indices = torch.randperm(len(dataset)).tolist()  # random permuation -> list
 
-# dataset = caltech_bee(root=root_path, transforms=get_transform(train=True))
-# dataset_validation = caltech_bee(root=root_path, transforms=get_transform(train=False))
-
-indices_test = indices[0:200]
-indices = indices[200:]
 validation_rate = 0.15
 
-dataset_train = torch.utils.data.Subset(dataset, indices[:int(len(indices) * (1 - validation_rate))])
-# -200])#int(len(indices)*(1-validation_rate))
-dataset_validation = torch.utils.data.Subset(dataset_validation, indices[int(len(indices) * (1 - validation_rate)):])
-dataset_test = torch.utils.data.Subset(dataset_validation, indices_test)
-
+dataset_train = torch.utils.data.Subset(dataset, indices)  # -200])#int(len(indices)*(1-validation_rate))
 print('Training data size:{}'.format(len(dataset_train)))
-print('Validation data size:{}'.format(len(dataset_validation)))
-print('Test data size:{}'.format(len(dataset_test)))
 
 
-#     transform=T.Compose([T.ToTensor(),
-#                          T.RandomHorizontalFlip(0.5)]),
 # define training and validation data loaders
 data_loader = torch.utils.data.DataLoader(
     dataset_train, batch_size=2, shuffle=True, num_workers=0,
     collate_fn=utils.collate_fn)
 
-data_loader_validation = torch.utils.data.DataLoader(
-    dataset_validation, batch_size=1, shuffle=False, num_workers=0,
-    collate_fn=utils.collate_fn)
 
-data_loader_test = torch.utils.data.DataLoader(
-    dataset_test, batch_size=1, shuffle=False, num_workers=0,
-    collate_fn=utils.collate_fn)
+# data_loader_test = torch.utils.data.DataLoader(
+#     dataset_test, batch_size=1, shuffle=False, num_workers=0,
+#     collate_fn=utils.collate_fn)
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
 # move model to the right device
 model.to(device)
 
-model_path = './model_mixed_epoch10.pt'
+model_path = './model_pollen_epoch10.pt'
 model.load_state_dict(torch.load(model_path,map_location=torch.device('cpu')))
-'''
-evaluate(model, data_loader_validation, device=device)
-'''
+
 # construct an optimizer
 params = [p for p in model.parameters() if p.requires_grad]
 # optimizer = torch.optim.Adam(params)
@@ -138,29 +110,22 @@ test_losses = []
 
 for epoch in range(num_epochs):
     # train for one epoch, printing every 10 iterations
-    # train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq=1)
+    #train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq=1)
     _, loss = train(model, optimizer, data_loader, device, epoch, print_freq=1)
     train_losses.append(loss)
     # # update the learning rate
     lr_scheduler.step()
-    # evaluate on the test dataset
-    evaluate(model, data_loader_validation, device=device)
-    if (epoch + 1) % 5 == 0:
-        visualize(model, data_loader_validation, device, epoch,
-                  save_folder=os.path.join(root_path, 'prediction_visualization'))
 
 import matplotlib.pyplot as plt
-
 # Plot training and val loss as a function of the epoch. Use this to monitor for overfitting.
 plt.plot(range(1, num_epochs + 1), train_losses, label='traning')
 plt.legend(loc='best')
 plt.xlabel('Epoch')
 plt.ylabel('Loss')
 plt.title('Loss')
-plt.savefig(os.path.join(root_path, 'prediction_visualization', 'loss.png'), bbox_inches='tight')
+plt.savefig(os.path.join(root_path, 'prediction_visualization','loss.png'), bbox_inches='tight')
 
-torch.save(model.state_dict(), "model_mixed_epoch{}.pt".format(20))
-
+torch.save(model.state_dict(), "model_pollen_epoch{}.pt".format(num_epochs))
 # test on testset
-evaluate(model, data_loader_test, device=device)
 
+#evaluate(model, data_loader_test, device=device)
